@@ -100,17 +100,18 @@ export function DocumentResponder({ onExit }: DocumentResponderProps) {
                   <DietaryPills value={values.dietary} onChange={(v) => setValue('dietary', v)} />
                 </FocusBlock>
 
-                <FocusBlock {...blockProps('organisation')} number={5} title="Où travaillez-vous ?" required={false}>
-                  <UnderlineField
-                  id="organisation"
-                  label="Organisation & poste"
-                  autoComplete="organization"
-                  placeholder="Ex. Product Lead chez TechMada"
-                  value={values.organisation}
-                  onChange={(v) => setValue('organisation', v)}
-                  valid={isFieldFilled('organisation', values)} />
-                
-                </FocusBlock>
+                {values.ticket === 'vip' && (
+                  <FocusBlock {...blockProps('organisation')} number={5} title="Où travaillez-vous (Pass VIP) ?" required={false}>
+                    <UnderlineField
+                    id="organisation"
+                    label="Organisation & poste"
+                    autoComplete="organization"
+                    placeholder="Ex. Product Lead chez TechMada"
+                    value={values.organisation}
+                    onChange={(v) => setValue('organisation', v)}
+                    valid={isFieldFilled('organisation', values)} />
+                  </FocusBlock>
+                )}
 
                 <FocusBlock {...blockProps('motivation')} number={6} title="Qu’attendez-vous du Sommet ?" description="Quelques mots suffisent — cela nous aide à composer les ateliers." required>
                   <UnderlineField

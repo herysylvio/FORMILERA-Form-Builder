@@ -1,3 +1,5 @@
+import type { BlockCondition } from './form';
+
 export type ResponderQuestionType = 'shortText' | 'email' | 'longText' | 'singleSelect' | 'multiSelect' | 'rating';
 
 export interface ResponderOption {
@@ -14,6 +16,7 @@ export interface ResponderQuestion {
   required: boolean;
   placeholder?: string;
   options?: ResponderOption[];
+  condition?: BlockCondition;
 }
 
 export type AnswerValue = string | string[] | number;

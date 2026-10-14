@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { initialResponderAnswers, responderQuestions } from '../data/responderQuestions';
 import { getAnswerError, OPTION_LETTERS } from '../utils/responder';
+import { isBlockVisible } from '../utils/conditions';
 import type { AnswerValue, Answers, SubmitState } from '../types/responder';
 
 export function useResponder(startIndex = 2) {
-  const total = responderQuestions.length;
   const [index, setIndex] = useState(startIndex);
   const [direction, setDirection] = useState<1 | -1>(1);
   const [answers, setAnswers] = useState<Answers>(initialResponderAnswers);
@@ -12,7 +12,26 @@ export function useResponder(startIndex = 2) {
   const [shakeKey, setShakeKey] = useState(0);
   const [submit, setSubmit] = useState<SubmitState>('idle');
   const timers = useRef<number[]>([]);
-  const question = responderQuestions[index];
+
+  const activeQuestions = useMemo(() => {
+    return responderQuestions.filter((q) => {
+      if (!q.condition) return true;
+      return isBlockVisible(
+        {
+          id: q.id,
+          type: q.type as any,
+          label: q.title,
+          required: q.required,
+          condition: q.condition
+        },
+        answers
+      );
+    });
+  }, [answers]);
+
+  const total = activeQuestions.length;
+  const safeIndex = Math.min(index, Math.max(0, total - 1));
+  const question = activeQuestions[safeIndex] || responderQuestions[0];
 
   useEffect(() => () => timers.current.forEach((t) => window.clearTimeout(t)), []);
 
@@ -30,14 +49,14 @@ export function useResponder(startIndex = 2) {
       return;
     }
     setError(null);
-    if (index === total - 1) {
+    if (safeIndex >= total - 1) {
       setSubmit('submitting');
       timers.current.push(window.setTimeout(() => setSubmit('done'), 1300));
       return;
     }
     setDirection(1);
-    setIndex((i) => i + 1);
-  }, [answers, index, question, submit, total]);
+    setIndex((i) => Math.min(i + 1, total - 1));
+  }, [answers, question, safeIndex, submit, total]);
 
   const prev = useCallback(() => {
     if (index === 0 || submit !== 'idle') return;
@@ -55,7 +74,7 @@ export function useResponder(startIndex = 2) {
       }
       setAnswer(question.id, optionId);
       // Single choice advances automatically after a short beat.
-      if (index < total - 1) {
+      if (safeIndex < total - 1) {
         timers.current.push(
           window.setTimeout(() => {
             setDirection(1);
@@ -64,7 +83,7 @@ export function useResponder(startIndex = 2) {
         );
       }
     },
-    [answers, index, question, setAnswer, total]
+    [answers, question, safeIndex, setAnswer, total]
   );
 
   const restart = useCallback(() => {
@@ -108,7 +127,7 @@ export function useResponder(startIndex = 2) {
 
   return {
     total,
-    index,
+    index: safeIndex,
     direction,
     question,
     answers,
