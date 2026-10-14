@@ -16,6 +16,14 @@ export type BlockType =
 'rating' |
 'payment';
 
+export type ConditionOperator = 'equals' | 'not_equals' | 'greater_than' | 'less_than';
+
+export interface BlockCondition {
+  sourceBlockId: string;
+  operator: ConditionOperator;
+  value: string | number;
+}
+
 export interface FormBlock {
   id: string;
   type: BlockType;
@@ -25,6 +33,7 @@ export interface FormBlock {
   options?: string[];
   required: boolean;
   hasLogic?: boolean;
+  condition?: BlockCondition;
 }
 
 export type BlockDraft = Omit<FormBlock, 'id'>;
