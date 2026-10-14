@@ -38,12 +38,14 @@ interface TopNavProps {
   onThemeToggle: () => void;
   onPreview: () => void;
   responsesCount: number;
+  onOpenTemplates?: () => void;
+  onHomeClick?: () => void;
 }
 
 type PublishState = 'idle' | 'publishing' | 'published';
 
 export function TopNav(props: TopNavProps) {
-  const { title, onTitleChange, saveState, view, onViewChange, mode, onModeChange, device, onDeviceChange, theme, onThemeToggle, onPreview, responsesCount } = props;
+  const { title, onTitleChange, saveState, view, onViewChange, mode, onModeChange, device, onDeviceChange, theme, onThemeToggle, onPreview, responsesCount, onOpenTemplates, onHomeClick } = props;
   const titleRef = useRef<HTMLInputElement>(null);
   const [publish, setPublish] = useState<PublishState>('idle');
 
@@ -61,11 +63,15 @@ export function TopNav(props: TopNavProps) {
       <div className="flex h-14 items-center gap-4 px-4 lg:px-5">
         {/* Left */}
         <div className="flex min-w-0 flex-1 items-center gap-3">
-          <a href="#" aria-label="Formilera home" className="flex shrink-0 items-center gap-2 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/60">
+          <button
+            type="button"
+            onClick={onHomeClick}
+            aria-label="Formilera home"
+            className="flex shrink-0 items-center gap-2 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/60">
             <LogoMark size="sm" />
             <span className="hidden text-[11px] font-bold tracking-[0.2em] text-slate-900 dark:text-white sm:inline">FORMILERA</span>
             <span className="h-1.5 w-1.5 rounded-full bg-[#6366F1] shadow-[0_0_8px_2px_rgba(99,102,241,0.7)]" aria-hidden="true" />
-          </a>
+          </button>
           <span className="h-5 w-px shrink-0 bg-slate-200 dark:bg-white/10" aria-hidden="true" />
           <div className="group flex min-w-0 items-center gap-1.5">
             <input
@@ -167,6 +173,16 @@ export function TopNav(props: TopNavProps) {
               </AnimatePresence>
             </button>
           </Tooltip>
+          {onOpenTemplates && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onOpenTemplates}
+              leftIcon={<LayoutGrid className="h-3.5 w-3.5 text-indigo-400" />}
+              className="rounded-full border border-slate-200 bg-white/60 text-slate-700 hover:bg-white hover:text-slate-900 focus-visible:ring-indigo-400 focus-visible:ring-offset-transparent dark:border-white/10 dark:bg-white/[0.05] dark:text-slate-200 dark:hover:bg-white/[0.09] dark:hover:text-white sm:inline-flex">
+              Modèles
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="sm"

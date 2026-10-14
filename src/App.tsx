@@ -16,23 +16,42 @@ interface AppProps {
 
 export function App({ screen = 'landing', defaultTheme = 'dark', defaultMode = 'document', slashMenuOpen = true }: AppProps) {
   const [current, setCurrent] = useState<Screen>(screen);
+  const [openModalOnBuilder, setOpenModalOnBuilder] = useState(false);
 
   useEffect(() => setCurrent(screen), [screen]);
   useEffect(() => window.scrollTo(0, 0), [current]);
 
-  const toBuilder = () => setCurrent('builder');
+  const toBuilderWithModal = () => {
+    setOpenModalOnBuilder(true);
+    setCurrent('builder');
+  };
 
-  if (current === 'landing') return <Landing onStart={toBuilder} onDemo={() => setCurrent('cardResponder')} />;
+  const toBuilder = () => {
+    setOpenModalOnBuilder(false);
+    setCurrent('builder');
+  };
+
+  if (current === 'landing') {
+    return (
+      <Landing
+        onStart={toBuilderWithModal}
+        onDemo={() => setCurrent('cardResponder')}
+      />
+    );
+  }
   if (current === 'submissions') return <Submissions onOpenEditor={toBuilder} />;
   if (current === 'documentResponder') return <DocumentResponder onExit={toBuilder} />;
   if (current === 'cardResponder') return <Responder onExit={toBuilder} />;
+
   return (
     <Builder
       defaultTheme={defaultTheme}
       defaultMode={defaultMode}
       slashMenuOpen={slashMenuOpen}
+      initialModalOpen={openModalOnBuilder}
       onPreview={(mode) => setCurrent(mode === 'card' ? 'cardResponder' : 'documentResponder')}
-      onOpenSubmissions={() => setCurrent('submissions')} />);
-
-
+      onOpenSubmissions={() => setCurrent('submissions')}
+      onExitHome={() => setCurrent('landing')}
+    />
+  );
 }

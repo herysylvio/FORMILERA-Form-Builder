@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { formMeta, initialBlocks } from '../data/sampleForm';
 import { createBlock, createId } from '../utils/blocks';
 import type { BlockDraft, BlockType, FormBlock, SaveState, SlashState } from '../types/form';
+import type { FormTemplate } from '../types/template';
 
 export function useFormBuilder(initialSlashOpen: boolean) {
   const [title, setTitleState] = useState(formMeta.title);
@@ -119,6 +120,31 @@ export function useFormBuilder(initialSlashOpen: boolean) {
     return () => window.removeEventListener('keydown', handler);
   }, [activeId, blocks, openSlash]);
 
+  const loadBlank = useCallback(() => {
+    setTitleState('Formulaire sans titre');
+    setDescriptionState('');
+    setIconState('📝');
+    setHasCoverState(false);
+    setBlocks([]);
+    setActiveId(null);
+    setSlash(null);
+    markDirty();
+  }, [markDirty]);
+
+  const loadTemplate = useCallback(
+    (template: FormTemplate) => {
+      setTitleState(template.title);
+      setDescriptionState(template.description);
+      setIconState(template.icon);
+      setHasCoverState(true);
+      setBlocks(template.blocks.map((b) => ({ ...b, id: createId() })));
+      setActiveId(template.blocks[0]?.id ?? null);
+      setSlash(null);
+      markDirty();
+    },
+    [markDirty]
+  );
+
   return {
     title,
     setTitle,
@@ -140,7 +166,9 @@ export function useFormBuilder(initialSlashOpen: boolean) {
     appendBlocks,
     duplicateBlock,
     deleteBlock,
-    reorderBlocks
+    reorderBlocks,
+    loadBlank,
+    loadTemplate
   };
 }
 
