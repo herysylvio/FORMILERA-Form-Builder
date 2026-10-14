@@ -3,6 +3,7 @@ import { AnimatePresence, motion, Reorder, useDragControls } from 'framer-motion
 import { GitBranch, GripVertical, Plus } from 'lucide-react';
 import { Tooltip } from '../formilera/Tooltip';
 import { BlockToolbar } from './BlockToolbar';
+import { ConditionEditor } from './ConditionEditor';
 import { getCatalogItem, isQuestion } from '../../utils/blocks';
 import { cn } from '../../utils/cn';
 import { springSoft } from '../../utils/motion';
@@ -14,6 +15,7 @@ interface BlockShellProps {
   mode: ExperienceMode;
   showGutter: boolean;
   hasPopover: boolean;
+  availableSources?: FormBlock[];
   onActivate: () => void;
   onAddBelow: () => void;
   onDuplicate: () => void;
@@ -26,7 +28,7 @@ interface BlockShellProps {
 const gutterBtn =
 'flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-200/70 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/60 dark:text-slate-500 dark:hover:bg-white/[0.06] dark:hover:text-slate-200';
 
-export function BlockShell({ block, isActive, mode, showGutter, hasPopover, onActivate, onAddBelow, onDuplicate, onDelete, onChange, children, after }: BlockShellProps) {
+export function BlockShell({ block, isActive, mode, showGutter, hasPopover, availableSources = [], onActivate, onAddBelow, onDuplicate, onDelete, onChange, children, after }: BlockShellProps) {
   const controls = useDragControls();
   const item = getCatalogItem(block.type);
   const Icon = item.icon;
@@ -105,20 +107,32 @@ export function BlockShell({ block, isActive, mode, showGutter, hasPopover, onAc
               Required
             </span>
           }
-          {block.hasLogic &&
-          <span className="inline-flex items-center gap-1 rounded-full bg-indigo-500/10 px-1.5 py-px font-mono text-[10px] uppercase tracking-[0.1em] text-indigo-600 dark:text-indigo-300">
-              <GitBranch className="h-2.5 w-2.5" aria-hidden="true" /> Logic
+          {block.condition && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-indigo-500/15 px-2 py-0.5 font-mono text-[10px] text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-300">
+              <GitBranch className="h-2.5 w-2.5" aria-hidden="true" /> 
+              Condition: {block.condition.operator === 'equals' ? '=' : block.condition.operator === 'not_equals' ? '≠' : block.condition.operator === 'greater_than' ? '>' : '<'} {String(block.condition.value).slice(0, 15)}
             </span>
-          }
+          )}
         </div>
         {children}
+
+        <AnimatePresence>
+          {block.hasLogic && isActive && (
+            <ConditionEditor
+              block={block}
+              availableSources={availableSources}
+              onChange={(condition) => onChange({ condition, hasLogic: Boolean(condition) })}
+              onClose={() => onChange({ hasLogic: Boolean(block.condition) })}
+            />
+          )}
+        </AnimatePresence>
       </div>
 
       <AnimatePresence>
         {isActive &&
         <BlockToolbar
           required={block.required}
-          hasLogic={Boolean(block.hasLogic)}
+          hasLogic={Boolean(block.hasLogic || block.condition)}
           canBeRequired={question}
           onDuplicate={onDuplicate}
           onToggleRequired={(required) => onChange({ required })}

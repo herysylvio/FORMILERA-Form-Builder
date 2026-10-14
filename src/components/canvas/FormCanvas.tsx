@@ -6,6 +6,7 @@ import { CoverHeader } from './CoverHeader';
 import { BlockShell } from './BlockShell';
 import { SlashInsertRow } from './SlashInsertRow';
 import { BlockRenderer } from './blocks/BlockRenderer';
+import { isQuestion } from '../../utils/blocks';
 import { useTheme } from '../../contexts/ThemeContext';
 import { cn } from '../../utils/cn';
 import { springSoft } from '../../utils/motion';
@@ -60,12 +61,14 @@ export function FormCanvas({ builder, mode, device }: FormCanvasProps) {
           className={cn('flex flex-col', mode === 'card' ? 'gap-4' : 'gap-1.5')}>
           
           <AnimatePresence initial={false}>
-            {blocks.map((block) => {
+            {blocks.map((block, index) => {
               const showSlash = slash?.afterId === block.id;
+              const availableSources = blocks.slice(0, index).filter((b) => isQuestion(b.type));
               return (
                 <BlockShell
                   key={block.id}
                   block={block}
+                  availableSources={availableSources}
                   isActive={activeId === block.id}
                   mode={mode}
                   showGutter={!framed}
